@@ -41,4 +41,10 @@ public class DocumentResource {
     public Mono<ResponseEntity> updateDocument(@PathVariable String id, @RequestBody DocumentDTO documentDTO) {
         return this.documentController.editDocument(id, documentDTO);
     }
+
+    @DeleteMapping(value = ID)
+    public Mono<ResponseEntity> deleteDocument(@PathVariable String id) {
+        return this.documentController.deleteDocument(id);
+    }
 }
+

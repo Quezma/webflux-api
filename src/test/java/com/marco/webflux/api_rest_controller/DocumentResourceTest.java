@@ -17,7 +17,7 @@ class DocumentResourceTest {
     void create() {
         DocumentDTO documentDTO = new DocumentDTO(true, new int[5], "5f8b3b4fb2c40c0c3f52d136", "document test", "test", "Tester");
         String get = this.restService.restbuilder().post()
-                .uri(DocumentResource.DOCUMENTS).body(BodyInserters.fromObject(documentDTO))
+                .uri(DocumentResource.DOCUMENTS).body(BodyInserters.fromValue(documentDTO))
                 .exchange().expectStatus().isCreated().expectBody(String.class).returnResult().getResponseBody();
         assertNotNull(get);
         assertEquals("Document created", get);
@@ -49,5 +49,16 @@ class DocumentResourceTest {
                 .expectBody(String.class).returnResult().getResponseBody();
         assertNotNull(get);
         assertEquals("Document updated", get);
+    }
+
+    @Test
+    void deleteDocument() {
+        String delete = this.restService.restbuilder()
+                .delete().uri(DocumentResource.DOCUMENTS + DocumentResource.ID, "5f8b3b4fb2c40c0c3f52d136")
+                .exchange()
+                .expectStatus().isAccepted()
+                .expectBody(String.class).returnResult().getResponseBody();
+        assertNotNull(delete);
+        assertEquals("Document deleted", delete);
     }
 }

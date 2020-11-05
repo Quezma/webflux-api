@@ -41,22 +41,36 @@ public class DocumentController {
     }
 
     public Flux<DocumentDTO> search() {
-        return this.documentRepository.findAll().map(DocumentDTO::new);
+        return this.documentRepository.findAll().filter(Document::getActive).map(DocumentDTO::new);
     }
 
     public Mono<ResponseEntity> editDocument(String id, DocumentDTO documentDTO) {
-        Mono<Document> document = this.documentRepository.findById(id).switchIfEmpty(Mono.error(new NotFoundException(" document " + id)))
+        Mono<Document> document = this.documentRepository.findById(id)
+                .switchIfEmpty(Mono.error(new NotFoundException(" document " + id)))
                 .map(documentDb -> {
                     documentDb.setUser(documentDTO.getUser());
                     documentDb.setName(documentDTO.getName());
-                    documentDTO.setActive(documentDTO.getActive());
-                    documentDTO.setData(documentDTO.getData());
+                    documentDb.setActive(documentDTO.getActive());
+                    documentDb.setData(documentDTO.getData());
                     return documentDb;
                 });
         return Mono.when(document)
                 .then(this.documentRepository.save(document.block()))
                 .map(callback -> {
                     return new ResponseEntity("Document updated", HttpStatus.ACCEPTED);
+                });
+    }
+
+    public Mono<ResponseEntity> deleteDocument(String id) {
+        Mono<Document> document = this.documentRepository.findById(id).switchIfEmpty(Mono.error(new NotFoundException(" document " + id)))
+                .map(documentDb -> {
+                    documentDb.setActive(false);
+                    return documentDb;
+                });
+        return Mono.when(document)
+                .then(this.documentRepository.save(document.block()))
+                .map(callback -> {
+                    return new ResponseEntity("Document deleted", HttpStatus.ACCEPTED);
                 });
     }
 }
